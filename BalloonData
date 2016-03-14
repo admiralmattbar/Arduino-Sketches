@@ -1,31 +1,30 @@
 /*
-  SD card read/write
+  SD card log sensor info
 
  This example shows how to read and write data to and from an SD card file
  The circuit:
- * SD card attached to SPI bus as follows:
- ** MOSI - pin 11
- ** MISO - pin 12
- ** CLK - pin 13
+ * Use ICSP pins on leonardo board for SD breakout board
  ** CS - pin 4
 
- created   Nov 2010
- by David A. Mellis
- modified 9 Apr 2012
- by Tom Igoe
+ Based on sketch created Nov 2010 by David A. Mellis and modified 9 Apr 2012 by Tom Igoe
 
  This example code is in the public domain.
 
- Modification for class balloon data project by Matthew Kissel.
+ This sketch created Mar 13 2016 by Matthew Kissel.
  */
 
 #include <SPI.h>
 #include <SD.h>
 
+//Create class for the txt file
 File myFile;
 
-const int chipSelect = 4;
-int seconds = 0;
+//Assign global variables
+const int chipSelect = 4;  //Variable for digital pin SD Board is plugged into
+int seconds = 0; //Variable for seconds, start at 0 and increase by 1 each second in loop
+int sensorPin = 0; //Variable for analog pin tmp is plugged into
+                   //tmp is using 3.3 V from board
+
 void setup() {
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
@@ -44,33 +43,51 @@ void setup() {
 
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  myFile = SD.open("test.txt", FILE_WRITE);
+  myFile = SD.open("datalog.txt", FILE_WRITE);
 
   // if the file opened okay, write to it:
   if (myFile) {
-    Serial.print("Writing to test.txt...");
+    Serial.print("Writing to datalog.txt...");
     myFile.println("testing 1, 2, 3.");
     // close the file:
     myFile.close();
     Serial.println("done.");
   } else {
     // if the file didn't open, print an error:
-    Serial.println("error opening test.txt");
+    Serial.println("error opening datalog.txt");
   }
 }
 
 
 
 void loop() {
+  //Get the temperature reading
+  int reading = analogRead(sensorPin);
+
+  //Convert the reading to a float with volts
+  float voltage = reading * 5.0;
+  voltage /= 1024.0;
+
+  //Convert the voltage to Celcius
+  float tempC = (voltage - 0.5) * 100;
+    
   // Add text to the file
-  myFile = SD.open("test.txt", FILE_WRITE);
+  myFile = SD.open("datalog.txt", FILE_WRITE);
   myFile.print("Seconds: ");
   myFile.println(seconds);
+  myFile.print("Temp: ");
+  myFile.print(tempC);
+  myFIle.println(" C");
+  
+  //For testing have the same thing print to serial
   Serial.print("Seconds: ");
   Serial.println(seconds);
+  Serial.print("Temp ");
+  Serial.print(tempC);
+  Serial.print(" C");
+  
   //Serial.println("Seconds: %d", seconds);
   seconds++;
   myFile.close();
   delay(1000);
 }
-
