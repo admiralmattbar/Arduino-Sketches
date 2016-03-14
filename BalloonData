@@ -22,8 +22,13 @@ File myFile;
 //Assign global variables
 const int chipSelect = 4;  //Variable for digital pin SD Board is plugged into
 int seconds = 0; //Variable for seconds, start at 0 and increase by 1 each second in loop
+int minutes = 0;
+int hours = 0;
 int sensorPin = 0; //Variable for analog pin tmp is plugged into
                    //tmp is using 3.3 V from board
+
+
+
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -73,21 +78,45 @@ void loop() {
     
   // Add text to the file
   myFile = SD.open("datalog.txt", FILE_WRITE);
-  myFile.print("Seconds: ");
-  myFile.println(seconds);
+  if(hours > 0){
+    myFile.print(hours);
+    myFile.print(" Hrs ");
+  }
+  if(minutes > 0){
+    myFile.print(minutes);
+    myFile.print(" Min ");
+  }
+  myFile.print(seconds);
+  myFile.println(" Sec ");
   myFile.print("Temp: ");
   myFile.print(tempC);
-  myFIle.println(" C");
+  myFile.println(" C");
   
   //For testing have the same thing print to serial
-  Serial.print("Seconds: ");
-  Serial.println(seconds);
-  Serial.print("Temp ");
+  if(hours > 0){
+    Serial.print(hours);
+    Serial.print(" Hrs ");
+  }
+  if(minutes > 0){
+    Serial.print(minutes);
+    Serial.print(" Min ");
+  }
+  Serial.print(seconds);
+  Serial.println(" Sec ");
+  Serial.print("Temp: ");
   Serial.print(tempC);
-  Serial.print(" C");
+  Serial.println(" C");
   
   //Serial.println("Seconds: %d", seconds);
   seconds++;
   myFile.close();
   delay(1000);
+  if(seconds == 60){
+    seconds = 0;
+    minutes++;
+  }
+  if(minutes == 60){
+    minutes = 0;
+    hours++;
+  }
 }
